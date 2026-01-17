@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quiz</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+        <div class="navWrap">
+  <button class="burger" id="burgerBtn" type="button" aria-label="Menü öffnen">
+    <div class="burgerIcon" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+  </button>
+
+  <div class="menuPanel" id="menuPanel">
+    <div class="menuHeader">
+      <p class="t">Navigation</p>
+    </div>
+    <a class="menuItem" href="index.html"><span class="dot"></span>Startseite</a>
+    <a class="menuItem" href="info.html"><span class="dot"></span>Projektinformation</a>
+    <a class="menuItem" href="glossary.html"><span class="dot"></span>Fremdwörtererklärung</a>
+
+  </div>
+</div>
+
+      <a class="badge" id="backLink" href="#">← Zurück</a>
+      <div class="badge" id="meta">…</div>
+    </div>
+
+    <div class="panel">
+      <div class="quizTop">
+        <div>
+          <h2 class="h2" id="title">…</h2>
+          <p class="muted" id="subtitle">…</p>
+        </div>
+        <div style="min-width:220px;">
+          <div class="progress"><div id="bar"></div></div>
+          <p class="small" id="counter" style="margin:8px 0 0;">…</p>
+        </div>
+      </div>
+
+      <h3 id="qText" style="margin:12px 0 8px; font-size:16px;">…</h3>
+      <div id="choices"></div>
+
+      <div class="explain" id="explain" style="display:none;"></div>
+
+      <div class="footerRow">
+        <span class="small" id="hint">Klicke eine Antwort an. Du bekommst sofort Feedback.</span>
+        <button class="btn primary" id="nextBtn" disabled>Nächste Frage</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="content.js"></script>
+  <script>
+    const id = qs("id");
+    const mode = qs("mode") || "all";
+    const chapter = CONTENT.chapters.find(c => c.id === id);
+    if (!chapter) location.href = "index.html";
+
+    const st = getChapterState(id);
+    // Optional: Wenn du es hart erzwingen willst, uncomment:
+    // if (!st.watched) location.href = `chapter.html?id=${encodeURIComponent(id)}`;
+
+    document.title = `Quiz – ${chapter.title}`;
+    document.getElementById("title").textContent = chapter.title;
+    document.getElementById("subtitle").textContent =
+      mode === "wrong" ? "Wiederholung: nur die zuvor falschen Fragen" : "Quiz: alle Fragen (100% für Abschluss)";
+    document.getElementById("meta").textContent = `Best: ${st.bestScore || 0}%`;
+    document.getElementById("backLink").href = `chapter.html?id=${encodeURIComponent(id)}`;
+
+    let questions = chapter.questions.slice();
+    if (mode === "wrong") {
+      const wrongSet = new Set(st.wrongIds || []);
+      questions = questions.filter(q => wrongSet.has(q.id));
+      if (questions.length === 0) {
+        // Wenn keine falschen Fragen vorhanden sind, zurück
+        location.href = `result.html?id=${encodeURIComponent(id)}`;
+      }
+    }
+
+    let index = 0;
+    let currentCorrectIndex = 0;
+let currentDisplayedChoices = [];
+
+function shuffleArray(arr){
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+    let correctCount = 0;
+    let wrongIdsThisRun = [];
+
+    const bar = document.getElementById("bar");
+    const counter = document.getElementById("counter");
+    const qText = document.getElementById("qText");
+    const choicesEl = document.getElementById("choices");
+    const explainEl = document.getElementById("explain");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function setProgress() {
+      const pct = Math.round(((index) / questions.length) * 100);
+      bar.style.width = pct + "%";
+      counter.textContent = `Frage ${Math.min(index+1, questions.length)}/${questions.length}`;
+    }
+
+   function renderQuestion() {
+  setProgress();
+  nextBtn.disabled = true;
+  explainEl.style.display = "none";
+  explainEl.textContent = "";
+  choicesEl.innerHTML = "";
+
+  const q = questions[index];
+  qText.textContent = q.question;
+
+  // Shuffle der Antwortoptionen
+  const order = shuffleArray([...Array(q.choices.length).keys()]);
+  currentDisplayedChoices = order.map(i => q.choices[i]);
+  currentCorrectIndex = order.indexOf(q.correctIndex);
+
+  currentDisplayedChoices.forEach((choiceText, i) => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.type = "button";
+    btn.textContent = choiceText;
+    btn.addEventListener("click", () => onAnswer(i));
+    choicesEl.appendChild(btn);
+  });
+}
+
+
+ function onAnswer(selectedIndex) {
+  const q = questions[index];
+  const buttons = [...choicesEl.querySelectorAll("button.choice")];
+  buttons.forEach(b => b.disabled = true);
+
+  const correct = currentCorrectIndex;
+  const isCorrect = selectedIndex === correct;
+
+  if (isCorrect) {
+    correctCount++;
+  } else {
+    wrongIdsThisRun.push(q.id);
+  }
+
+  // Markierungen
+  buttons[correct].classList.add("correct");
+  if (!isCorrect) buttons[selectedIndex].classList.add("wrong");
+
+  // Erklärung
+  explainEl.style.display = "block";
+  explainEl.innerHTML = `
+    <div style="margin-bottom:6px;">
+      ${isCorrect
+        ? `<span class="pill ok">✅ Richtig</span>`
+        : `<span class="pill no">❌ Falsch</span> <span class="pill">Richtig: ${escapeHtml(currentDisplayedChoices[correct])}</span>`}
+    </div>
+    <div>${escapeHtml(q.explanation || "")}</div>
+  `;
+
+  nextBtn.disabled = false;
+}
+
+
+    nextBtn.addEventListener("click", () => {
+      index++;
+      if (index >= questions.length) {
+        // Ergebnis speichern
+        const score = Math.round((correctCount / questions.length) * 100);
+
+        const prev = getChapterState(id);
+        const newBest = Math.max(prev.bestScore || 0, score);
+
+        // wrongIds-Logik:
+        // - Bei „all“ speichern wir die falschen IDs.
+        // - Bei „wrong“ speichern wir die noch falschen IDs.
+        // - Bei 100%: mastered true und wrongIds leeren.
+        let newWrong = [];
+        if (score === 100) {
+          newWrong = [];
+        } else {
+          newWrong = wrongIdsThisRun.slice();
+        }
+
+        patchChapterState(id, {
+          lastScore: score,
+          bestScore: newBest,
+          wrongIds: newWrong,
+          mastered: score === 100 ? true : (prev.mastered || false)
+        });
+
+        location.href = `result.html?id=${encodeURIComponent(id)}&mode=${encodeURIComponent(mode)}&score=${score}`;
+        return;
+      }
+      renderQuestion();
+    });
+
+    renderQuestion();
+
+(function(){
+    const btn = document.getElementById("burgerBtn");
+    const panel = document.getElementById("menuPanel");
+    if(!btn || !panel) return;
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      panel.classList.toggle("open");
+    });
+
+    document.addEventListener("click", () => panel.classList.remove("open"));
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape") panel.classList.remove("open");
+    });
+  })();
+  </script>
+</body>
+</html>

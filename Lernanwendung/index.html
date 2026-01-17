@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vom Reiz zur Wahrnehmung</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="home">
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <h1 id="appTitle">…</h1>
+        <p id="appSub">…</p>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div class="badge" id="overallBadge">Fortschritt: …</div>
+
+        <!-- Burger Menü -->
+        <div class="navWrap">
+          <button class="burger" id="burgerBtn" type="button" aria-label="Menü öffnen">
+            <div class="burgerIcon" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+          </button>
+
+          <div class="menuPanel" id="menuPanel">
+            <div class="menuHeader">
+              <p class="t">Navigation</p>
+            </div>
+            <a class="menuItem" href="index.html"><span class="dot"></span>Startseite</a>
+            <a class="menuItem" href="info.html"><span class="dot"></span>Projektinformation</a>
+            <a class="menuItem" href="glossary.html"><span class="dot"></span>Fremdwörtererklärung</a>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="content.js"></script>
+
+  <script>
+    const grid = document.getElementById("grid");
+    document.getElementById("appTitle").textContent = CONTENT.appTitle;
+    document.getElementById("appSub").textContent = CONTENT.subtitle;
+
+    function render() {
+      grid.innerHTML = "";
+      let masteredCount = 0;
+
+      for (const ch of CONTENT.chapters) {
+        const st = getChapterState(ch.id);
+        if (st.mastered) masteredCount++;
+
+        const pill = st.mastered
+          ? `<span class="pill ok">✓ Abgeschlossen (100%)</span>`
+          : `<span class="pill no">Nicht abgeschlossen</span>`;
+
+        const best = `<span class="pill">Best: ${st.bestScore || 0}%</span>`;
+        const watched = `<span class="pill">${st.watched ? "Video: gesehen" : "Video: offen"}</span>`;
+
+        const el = document.createElement("div");
+        el.className = "card";
+
+        // Thumbnail: Wenn leer, bleibt ein Premium-Gradient.
+        const thumbHtml = ch.thumbnail
+          ? `<img src="${ch.thumbnail}" alt="${escapeHtml(ch.title)}">`
+          : "";
+
+        el.innerHTML = `
+          <div class="thumb">${thumbHtml}</div>
+          <div class="content">
+            <h3>${escapeHtml(ch.title)}</h3>
+            <p>${escapeHtml(ch.blurb)}</p>
+            <div class="row" style="margin-bottom:10px;">
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                ${pill}
+                ${best}
+                ${watched}
+              </div>
+            </div>
+            <div class="row">
+              <span class="small">${ch.questions.length} Fragen</span>
+              <a class="btn primary" href="chapter.html?id=${encodeURIComponent(ch.id)}">Kapitel öffnen</a>
+            </div>
+          </div>
+        `;
+        grid.appendChild(el);
+      }
+
+      document.getElementById("overallBadge").textContent =
+        `Fortschritt: ${masteredCount}/${CONTENT.chapters.length} Kapitel abgeschlossen`;
+    }
+
+    render();
+
+    // Burger Menü Logik
+    (function(){
+      const btn = document.getElementById("burgerBtn");
+      const panel = document.getElementById("menuPanel");
+      if(!btn || !panel) return;
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        panel.classList.toggle("open");
+      });
+
+      document.addEventListener("click", () => panel.classList.remove("open"));
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "Escape") panel.classList.remove("open");
+      });
+    })();
+  </script>
+</body>
+</html>

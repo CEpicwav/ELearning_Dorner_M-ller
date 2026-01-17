@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fremdwörtererklärung</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Fremdwörtererklärung</h1>
+        <p>Begriffe aus dem Skript – kurz und verständlich</p>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a class="badge" href="index.html">← Zur Startseite</a>
+
+        <!-- Burger Menü -->
+        <div class="navWrap">
+          <button class="burger" id="burgerBtn" type="button" aria-label="Menü öffnen">
+            <div class="burgerIcon" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+          </button>
+
+          <div class="menuPanel" id="menuPanel">
+            <div class="menuHeader"><p class="t">Navigation</p></div>
+            <a class="menuItem" href="index.html"><span class="dot"></span>Startseite</a>
+            <a class="menuItem" href="info.html"><span class="dot"></span>Projektinformation</a>
+            <a class="menuItem" href="glossary.html"><span class="dot"></span>Fremdwörtererklärung</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="h2">Begriffe suchen</h2>
+
+      <div class="searchRow">
+        <input class="searchInput" id="search" placeholder="Begriff eingeben (z. B. „Synapse“, „Voxel“, „Depolarisation“) …" />
+        <span class="pill" id="countPill">0 Begriffe</span>
+      </div>
+
+      <div class="termGrid" id="termGrid"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Burger Menü Logik =====
+    (function(){
+      const btn = document.getElementById("burgerBtn");
+      const panel = document.getElementById("menuPanel");
+      if(!btn || !panel) return;
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        panel.classList.toggle("open");
+      });
+
+      document.addEventListener("click", () => panel.classList.remove("open"));
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "Escape") panel.classList.remove("open");
+      });
+    })();
+
+    // ===== Glossar-Daten =====
+    const TERMS = [
+      { t:"Reiz", d:"Ein Einfluss aus der Umwelt oder dem Körper (z. B. Licht, Druck, Schall), der ein Sinnesorgan aktiviert." },
+      { t:"Rezeptor / Rezeptorzelle", d:"Spezialisierte Struktur/Zelle, die Reize aufnimmt und in ein neuronales Signal übersetzt." },
+      { t:"Neuron", d:"Nervenzelle, die Signale verarbeitet und weiterleitet." },
+      { t:"Dendriten", d:"„Eingänge“ des Neurons: Sie empfangen Signale von anderen Zellen." },
+      { t:"Soma (Zellkörper)", d:"„Rechenzentrum“: Hier werden viele erregende und hemmende Inputs zusammengeführt (integriert)." },
+      { t:"Axon", d:"„Leitung“: Transportiert Aktionspotenziale über Distanz zur nächsten Kontaktstelle." },
+      { t:"Synapse", d:"Kontaktstelle, an der ein Neuron Informationen an eine andere Zelle überträgt (meist chemisch)." },
+
+      { t:"Neuronales Signal", d:"Elektrische Aktivität in Nervenzellen (Spannungsänderungen, Spikes/Aktionspotenziale) – das ist das, was im Gehirn ankommt." },
+      { t:"Verarbeitung", d:"Aktives Filtern, Verstärken, Hemmen und Kombinieren von Signalen im Nervensystem." },
+      { t:"Wahrnehmung", d:"Das bewusste „Erleben“ (z. B. heiß/rot/lauter Ton), das aus der Verarbeitung neuronaler Signale entsteht." },
+
+      { t:"Membranpotenzial", d:"Elektrische Spannung zwischen Zellinnerem und Außenraum." },
+      { t:"Ruhepotenzial", d:"Typischer Grundzustand des Membranpotenzials (oft ca. −70 mV). Innen ist gegenüber außen negativer." },
+      { t:"mV (Millivolt)", d:"Einheit für Spannung. 1 mV = 0,001 V." },
+
+      { t:"Depolarisation", d:"Membranpotenzial wird weniger negativ (Richtung Schwelle) → erhöht die Wahrscheinlichkeit zu feuern." },
+      { t:"Hyperpolarisation", d:"Membranpotenzial wird negativer (weg von der Schwelle) → senkt die Wahrscheinlichkeit zu feuern." },
+      { t:"Schwelle", d:"Grenzwert, ab dem ein Aktionspotenzial ausgelöst wird." },
+
+      { t:"Aktionspotenzial", d:"Kurzer, stereotypischer Spannungsimpuls („Spike“) der Membran, der entlang des Axons fortgeleitet wird." },
+      { t:"Alles-oder-Nichts", d:"Sobald die Schwelle erreicht ist, entsteht ein Aktionspotenzial in typischer Form – nicht „halb“ oder „ein bisschen“." },
+      { t:"Fortgeleitete Reaktion", d:"Das Aktionspotenzial breitet sich entlang des Axons aus, ohne seine typische Form zu verlieren." },
+      { t:"Refraktärphase", d:"Zeit nach einem Aktionspotenzial, in der ein weiteres AP schwerer oder gar nicht auslösbar ist → begrenzt die maximale Feuerrate." },
+
+      { t:"Feuerrate", d:"Wie viele Spikes/Aktionspotenziale pro Zeit auftreten (z. B. pro Sekunde)." },
+      { t:"Spontanaktivität", d:"Grundaktivität: Viele Neuronen feuern auch ohne äußeren Reiz gelegentlich." },
+
+      { t:"Einzelzellableitung", d:"Messmethode, die die Aktivität einzelner Neuronen (Spikes) direkt aufzeichnet." },
+      { t:"Referenzelektrode", d:"Zweiter Messpunkt, damit man eine Spannungsdifferenz (Signal minus Referenz) messen kann." },
+      { t:"Spike", d:"Kurzer Ausschlag in einer Ableitung – entspricht meist einem Aktionspotenzial." },
+      { t:"Rasterplot", d:"Darstellung von Spike-Zeitpunkten über Zeit: Jeder Strich = ein Spike." },
+
+      { t:"fMRT", d:"Funktionelle Magnetresonanztomographie: misst Aktivität indirekt (über Blutfluss/Oxygenierung), nicht einzelne Spikes." },
+      { t:"Voxel", d:"Kleiner 3D-„Würfel“ im Gehirnscan. Ein Voxel enthält sehr viele Neuronen." },
+
+      { t:"Konnektivität", d:"Wie Bereiche im Gehirn verbunden sind oder gemeinsam arbeiten." },
+      { t:"Strukturelle Konnektivität", d:"Anatomische Bahnen („Straßen“) – echte Leitungswege." },
+      { t:"Funktionelle Konnektivität", d:"Ähnlichkeit/Korrelation von Aktivitätsverläufen („gemeinsamer Verkehr“)." },
+      { t:"Seed-Position", d:"Ausgangsregion in fMRT-Analysen: Man prüft, welche Bereiche mit ihrer Zeitreihe korrelieren." },
+
+      { t:"Korrelation", d:"Statistischer Zusammenhang: Werte schwanken ähnlich. Zeigt Zusammenhang, nicht automatisch Ursache." },
+      { t:"Kausalität", d:"Ursache-Wirkung: A verursacht B." },
+      { t:"Leib-Seele-Problem", d:"Warum Messungen von Aktivitätsmustern nicht automatisch erklären, warum sich subjektives Erleben „so anfühlt“." },
+
+      { t:"Neuronale Repräsentation", d:"Aktivitätsmuster von Neuronen, das Information über einen Reiz/Erlebnis trägt." },
+      { t:"Einzelzellcodierung", d:"Ein bestimmtes Neuron reagiert sehr selektiv auf ein bestimmtes Objekt/Konzept." },
+      { t:"Sparse Coding", d:"Eine kleine Gruppe feuert deutlich, viele bleiben eher ruhig." },
+      { t:"Verteilte Repräsentation", d:"Information/Erfahrung ist über mehrere Areale/Komponenten verteilt, nicht nur an einem Ort." },
+
+      { t:"Exzitatorisch (erregend)", d:"Erhöht die Wahrscheinlichkeit, dass ein Neuron feuert." },
+      { t:"Inhibitorisch (hemmend)", d:"Senkt die Wahrscheinlichkeit, dass ein Neuron feuert." },
+      { t:"Integration", d:"Zusammenführen und „Verrechnen“ vieler Inputs (Erregung und Hemmung), meist im Soma." }
+    ];
+
+    const grid = document.getElementById("termGrid");
+    const search = document.getElementById("search");
+    const countPill = document.getElementById("countPill");
+
+    function render(list){
+      grid.innerHTML = list.map(x => `
+        <div class="termCard">
+          <p class="termTitle">${x.t}</p>
+          <p class="termDef">${x.d}</p>
+        </div>
+      `).join("");
+      countPill.textContent = `${list.length} Begriffe`;
+    }
+
+    function filterTerms(q){
+      const s = (q || "").trim().toLowerCase();
+      if(!s) return TERMS;
+      return TERMS.filter(x =>
+        x.t.toLowerCase().includes(s) || x.d.toLowerCase().includes(s)
+      );
+    }
+
+    render(TERMS);
+
+    search.addEventListener("input", () => {
+      render(filterTerms(search.value));
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Projektinformation</title>
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Kleine Zusatz-Styles nur für Quellen-UI -->
+  <style>
+    .formRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .input{
+      flex: 1 1 220px;
+      border:1px solid var(--line);
+      background: rgba(9,14,22,.45);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 12px;
+      outline: none;
+      font-size: 14px;
+    }
+    .input::placeholder{ color: rgba(123,138,163,.75); }
+    .input:focus{ border-color: rgba(23,182,180,.55); }
+
+    .srcList{
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .srcItem{
+      border:1px solid var(--line);
+      background: rgba(9,14,22,.45);
+      border-radius: 16px;
+      padding: 12px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .srcLeft{
+      min-width: 220px;
+      flex: 1 1 520px;
+    }
+    .srcTitle{
+      margin:0 0 6px;
+      font-size: 14px;
+      font-weight: 650;
+    }
+    .srcLink{
+      display:inline-block;
+      color: rgba(233,240,255,.92);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      overflow-wrap:anywhere;
+      font-size: 13px;
+    }
+    .srcNote{
+      margin:8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .srcActions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex: 0 0 auto;
+    }
+    .hintLine{
+      margin-top:10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .msg{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(16,24,38,.55);
+      color: var(--muted);
+      font-size: 13px;
+      display:none;
+    }
+    .msg.ok{ border-color: rgba(56,217,150,.35); background: rgba(56,217,150,.08); color: rgba(56,217,150,.95); }
+    .msg.bad{ border-color: rgba(255,90,122,.35); background: rgba(255,90,122,.08); color: rgba(255,90,122,.95); }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Projektinformation</h1>
+        <p>Quellen, Ziel und Kontext der Lernanwendung</p>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a class="badge" href="index.html">← Zur Startseite</a>
+
+        <!-- Burger Menü -->
+        <div class="navWrap">
+          <button class="burger" id="burgerBtn" type="button" aria-label="Menü öffnen">
+            <div class="burgerIcon" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+          </button>
+          <div class="menuPanel" id="menuPanel">
+            <div class="menuHeader"><p class="t">Navigation</p></div>
+            <a class="menuItem" href="index.html"><span class="dot"></span>Startseite</a>
+            <a class="menuItem" href="info.html"><span class="dot"></span>Projektinformation</a>
+            <a class="menuItem" href="glossary.html"><span class="dot"></span>Fremdwörtererklärung</a>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="h2">Worum geht es in diesem Projekt?</h2>
+      <p class="muted">
+        Diese Lernanwendung vermittelt die Grundlagen der Sinneswahrnehmung und Sinnesphysiologie.
+        Die Inhalte sind kapitelweise in kurze Videoeinheiten gegliedert und werden anschließend durch
+        Multiple-Choice-Fragen mit Sofort-Feedback gefestigt. Ziel ist ein Schritt-für-Schritt-Lernen.
+      </p>
+
+      <div style="height:14px"></div>
+
+      <h2 class="h2">Quellen</h2>
+      <p class="muted">
+        Angegeben sind Quellen inkl. <b>Links</b>.
+
+
+
+      <!-- Quellen-Liste -->
+      <div class="srcList" id="srcList"></div>
+<p class="muted">
+  <a href="https://flexikon.doccheck.com/de/Sinnesphysiologie#:~:text=Die%20Sinnesphysiologie%20ist%20ein%20Teilgebiet,und%20gustatorischen%20Wahrnehmung%20(Schmecken)." target="_blank" rel="noopener noreferrer">DocCheck Flexicon</a><br>
+  <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer">ChatGPT</a><br>
+  <a href="https://www.ardmediathek.de/video/alpha-lernen-oder-biologie/sinne-und-reaktionen/ard-alpha/Y3JpZDovL2JyLmRlL3ZpZGVvL2ViNmNiYTNjLWUzNzctNDZjMi1hYTdmLWQwNDc5NThiYTFkZA" target="_blank" rel="noopener noreferrer">ARD</a><br>
+  <a href="https://de.wikipedia.org/wiki/Sinnesphysiologie#:~:text=Sinnesphysiologie%20*%20Sehen%20–%20visuelles%20System%20des,Wärme%2C%20Kälte%20und%20Schmerz%20der%20Körperoberfläche%20(Oberflächensensibilität)" target="_blank" rel="noopener noreferrer">WIKIPEDIA</a><br>
+  <a href="https://www.studydrive.net/de/flashcards/allgemeine-sinnesphysiologie/109458" target="_blank" rel="noopener noreferrer">Studydrive</a>
+</p>
+
+      <div style="height:12px"></div>
+
+      <div class="panel" style="background: rgba(9,14,22,.45); border-radius: 16px;">
+        <p class="muted" style="margin:0;">
+        *Ein Projekt von Bennett Müller und Leon Dorner<br>
+        *E-Learning und Online-Learning<br>
+        *In Begleitung von Professor Ullrich Dittler<br>
+        *MKB 4 || Hochschule Furtwangen    
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Burger Menü Logik =====
+    (function(){
+      const btn = document.getElementById("burgerBtn");
+      const panel = document.getElementById("menuPanel");
+      if(!btn || !panel) return;
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        panel.classList.toggle("open");
+      });
+
+      document.addEventListener("click", () => panel.classList.remove("open"));
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "Escape") panel.classList.remove("open");
+      });
+    })();
+
+    // ===== Quellen-Manager (localStorage) =====
+    const SRC_KEY = "sinnesphysio_sources_v1";
+
+    function loadSources(){
+      try{
+        return JSON.parse(localStorage.getItem(SRC_KEY) || "[]");
+      }catch{
+        return [];
+      }
+    }
+    function saveSources(list){
+      localStorage.setItem(SRC_KEY, JSON.stringify(list));
+    }
+
+    function normalizeUrl(url){
+      let u = (url || "").trim();
+      if(!u) return "";
+      if(!/^https?:\/\//i.test(u)){
+        u = "https://" + u;
+      }
+      // Validierung
+      try{
+        new URL(u);
+        return u;
+      }catch{
+        return null;
+      }
+    }
+
+    function showMsg(text, type){
+      const el = document.getElementById("msg");
+      el.className = "msg " + (type || "");
+      el.textContent = text;
+      el.style.display = "block";
+      clearTimeout(showMsg._t);
+      showMsg._t = setTimeout(() => { el.style.display = "none"; }, 2600);
+    }
+
+    function renderSources(){
+      const listEl = document.getElementById("srcList");
+      const sources = loadSources();
+      listEl.innerHTML = "";
+
+      if(sources.length === 0){
+        listEl.innerHTML = `
+          <div class="srcItem">
+            <div class="srcLeft">
+              <p class="srcTitle">Noch keine Quellen eingetragen</p>
+              <p class="srcNote" style="margin-top:0;">Füge oben Titel + Link hinzu. (Wird lokal gespeichert.)</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      sources.forEach((s, idx) => {
+        const item = document.createElement("div");
+        item.className = "srcItem";
+
+        const safeTitle = String(s.title || "").replace(/[<>"']/g, "");
+        const safeUrl = String(s.url || "").replace(/[<>"']/g, "");
+        const safeNote = String(s.note || "").replace(/[<>"']/g, "");
+
+        item.innerHTML = `
+          <div class="srcLeft">
+            <p class="srcTitle">${safeTitle || "Ohne Titel"}</p>
+            <a class="srcLink" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>
+            ${safeNote ? `<p class="srcNote">${safeNote}</p>` : ``}
+          </div>
+          <div class="srcActions">
+            <button class="btn" type="button" data-copy="${idx}">Link kopieren</button>
+            <button class="btn" type="button" data-del="${idx}">Löschen</button>
+          </div>
+        `;
+        listEl.appendChild(item);
+      });
+
+      // Actions
+      listEl.querySelectorAll("button[data-copy]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const i = Number(btn.getAttribute("data-copy"));
+          const url = loadSources()[i]?.url || "";
+          try{
+            await navigator.clipboard.writeText(url);
+            showMsg("Link kopiert ✅", "ok");
+          }catch{
+            showMsg("Kopieren nicht möglich (Browser-Rechte) ❌", "bad");
+          }
+        });
+      });
+
+      listEl.querySelectorAll("button[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.getAttribute("data-del"));
+          const sources = loadSources();
+          sources.splice(i, 1);
+          saveSources(sources);
+          renderSources();
+          showMsg("Quelle gelöscht.", "ok");
+        });
+      });
+    }
+
+    document.getElementById("addSrcBtn").addEventListener("click", () => {
+      const title = document.getElementById("srcTitle").value.trim();
+      const rawUrl = document.getElementById("srcUrl").value.trim();
+      const note = document.getElementById("srcNote").value.trim();
+
+      if(!title){
+        showMsg("Bitte einen Quellen-Titel eingeben.", "bad");
+        return;
+      }
+      if(!rawUrl){
+        showMsg("Bitte einen Link eingeben.", "bad");
+        return;
+      }
+
+      const url = normalizeUrl(rawUrl);
+      if(url === null){
+        showMsg("Der Link ist ungültig. (Beispiel: https://example.com)", "bad");
+        return;
+      }
+
+      const sources = loadSources();
+      sources.unshift({ title, url, note, createdAt: Date.now() });
+      saveSources(sources);
+
+      document.getElementById("srcTitle").value = "";
+      document.getElementById("srcUrl").value = "";
+      document.getElementById("srcNote").value = "";
+
+      renderSources();
+      showMsg("Quelle hinzugefügt ✅", "ok");
+    });
+
+    // Enter-to-add
+    ["srcTitle","srcUrl","srcNote"].forEach(id => {
+      document.getElementById(id).addEventListener("keydown", (e) => {
+        if(e.key === "Enter"){
+          e.preventDefault();
+          document.getElementById("addSrcBtn").click();
+        }
+      });
+    });
+
+    renderSources();
+  </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ergebnis</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+        <div class="navWrap">
+  <button class="burger" id="burgerBtn" type="button" aria-label="Menü öffnen">
+    <div class="burgerIcon" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+  </button>
+
+  <div class="menuPanel" id="menuPanel">
+    <div class="menuHeader">
+      <p class="t">Navigation</p>
+    </div>
+    <a class="menuItem" href="index.html"><span class="dot"></span>Startseite</a>
+    <a class="menuItem" href="info.html"><span class="dot"></span>Projektinformation</a>
+    <a class="menuItem" href="glossary.html"><span class="dot"></span>Fremdwörtererklärung</a>
+
+  </div>
+</div>
+
+      <a class="badge" href="index.html">← Zur Startseite</a>
+      <div class="badge" id="meta">…</div>
+    </div>
+
+    <div class="panel">
+      <h2 class="h2" id="title">…</h2>
+      <p class="muted" id="desc">…</p>
+
+      <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <span class="pill" id="scorePill">Score: …</span>
+        <span class="pill" id="bestPill">Best: …</span>
+        <span class="pill" id="masterPill">…</span>
+      </div>
+
+      <div class="footerRow" style="margin-top:16px;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a class="btn" id="backChapter" href="#">Zum Kapitel</a>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a class="btn" id="repeatAll" href="#">Quiz komplett wiederholen</a>
+          <a class="btn primary" id="repeatWrong" href="#">Falsche Fragen wiederholen</a>
+        </div>
+      </div>
+
+      <p class="muted" style="margin-top:12px;">
+        Ziel: <b>100%</b> = Kapitel abgeschlossen. Bei falschen Antworten bekommst du sofort die richtige Lösung + Erklärung.
+      </p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="content.js"></script>
+  <script>
+    const id = qs("id");
+    const score = Number(qs("score") || 0);
+    const chapter = CONTENT.chapters.find(c => c.id === id);
+    if (!chapter) location.href = "index.html";
+
+    const st = getChapterState(id);
+
+    document.title = `Ergebnis – ${chapter.title}`;
+    document.getElementById("title").textContent = chapter.title;
+    document.getElementById("desc").textContent = st.mastered
+      ? "Stark! Dieses Kapitel ist abgeschlossen."
+      : "Noch nicht abgeschlossen. Wiederhole die falschen Fragen für 100%.";
+
+    document.getElementById("meta").textContent = `Best: ${st.bestScore || 0}%`;
+    document.getElementById("scorePill").textContent = `Score: ${st.lastScore || score}%`;
+    document.getElementById("bestPill").textContent = `Best: ${st.bestScore || 0}%`;
+    document.getElementById("masterPill").textContent = st.mastered ? "✓ Abgeschlossen (100%)" : "Nicht abgeschlossen";
+    document.getElementById("masterPill").className = st.mastered ? "pill ok" : "pill no";
+
+    document.getElementById("backChapter").href = `chapter.html?id=${encodeURIComponent(id)}`;
+    document.getElementById("repeatAll").href = `quiz.html?id=${encodeURIComponent(id)}&mode=all`;
+
+    const repeatWrong = document.getElementById("repeatWrong");
+    repeatWrong.href = `quiz.html?id=${encodeURIComponent(id)}&mode=wrong`;
+    if (!st.wrongIds || st.wrongIds.length === 0) {
+      repeatWrong.classList.add("btn");
+      repeatWrong.classList.remove("primary");
+      repeatWrong.textContent = "Keine falschen Fragen (fertig)";
+      repeatWrong.style.pointerEvents = "none";
+      repeatWrong.style.opacity = "0.55";
+    }
+    (function(){
+    const btn = document.getElementById("burgerBtn");
+    const panel = document.getElementById("menuPanel");
+    if(!btn || !panel) return;
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      panel.classList.toggle("open");
+    });
+
+    document.addEventListener("click", () => panel.classList.remove("open"));
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape") panel.classList.remove("open");
+    });
+  })();
+  </script>
+</body>
+</html>
